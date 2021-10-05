@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>three.js webgl - loader - ttf</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <div id="info">
+        <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - TTFLoader using opentype by gero3
+        <br />type to enter new text, drag to spin the text
+    </div>
+
+    <script src="./opentype.min.js"></script>
+    <script src="./three.min.js"></script>
+    <script src="./TTFLoader.js"></script>
+
+    <script>
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+
+
+
+
+        scene.add(cube);
+    
+
+        camera.position.z = 5;
+
+        function animate() {
+
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+
+        }
+
+
+
+
+        animate();
+
+        window.addEventListener('mousemove', onMouseMove, false);
+        window.addEventListener('click', onClick);
+
+
+        function onMouseMove(event) {
+
+            // calculate mouse position in normalized device coordinates
+            // (-1 to +1) for both components
+
+            mouse.x = ( ( event.clientX - renderer.domElement.offsetLeft ) / renderer.domElement.width ) * 2 - 1;
+    mouse.y = - ( ( event.clientY - renderer.domElement.offsetTop ) / renderer.domElement.height ) * 2 + 1;
+            
+
+
+        }
+    
+        function onClick(event) {
+  raycaster.setFromCamera(mouse, camera);
+  let intersects = raycaster.intersectObjects(scene.children);
+  intersects[0].object.material.color.set( 0xff0000 );
+  if (intersects.length > 0) {
+    
+    return;
+  }
+}
+
+    </script>
+</body>
+
+</html>

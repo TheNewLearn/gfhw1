@@ -1,211 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>three.js webgl - loader - ttf</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
-	</head>
-	<body>
-		<div id="info">
-			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - TTFLoader using opentype by gero3
-			<br/>type to enter new text, drag to spin the text
-		</div>
 
-		<script src="./opentype.min.js"></script>
-		<script src="./three.min.js"></script>
-		<script src="./TTFLoader.js"></script>
-		
-		<script>
-		
-		
+<head>
+	<title>three.js webgl - loader - ttf</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="main.css">
+</head>
 
+<body>
+	<div id="info">
+		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - TTFLoader using opentype by gero3
+		<br />type to enter new text, drag to spin the text
+	</div>
 
-			var fontttf = "HanyiSentyFlorCalligraphy.ttf";
+	<script src="./opentype.min.js"></script>
+	<script src="./three.min.js"></script>
+	<script src="./TTFLoader.js"></script>
 
+	<script>
+		const raycaster = new THREE.Raycaster();
+		const mouse = new THREE.Vector2();
+		var fontttf = "HanyiSentyFlorCalligraphy.ttf";
+		let container;
+		let camera, cameraTarget, scene, renderer;
+		let group, textMesh1, textMesh2, textGeo, material;
+		let firstLetter = true;
+
+		let text = '子丑寅卯辰巳午未申酉戌亥';
+		const height = 20,
+			size = 70,
+			hover = 30,
+			curveSegments = 4,
+			bevelThickness = 2,
+			bevelSize = 1.5;
+
+		let font = null;
+		const mirror = false;
+
+		let targetRotation = 0;
+		let targetRotationOnPointerDown = 0;
+
+		let pointerX = 0;
+		let pointerXOnPointerDown = 0;
+
+		let windowHalfX = window.innerWidth / 2;
+
+		init();
+		animate();
+
+		function init() {
+			const raycaster = new THREE.Raycaster();
+			const mouse = new THREE.Vector2();
+			container = document.createElement('div');
+			document.body.appendChild(container);
 			
-			let container;
-			let camera, cameraTarget, scene, renderer;
-			let group, textMesh1, textMesh2, textGeo, material;
-			let firstLetter = true;
+			// CAMERA
 
-			let text = '子丑寅卯辰巳午未申酉戌亥';
-			const height = 20,
-				size = 70,
-				hover = 30,
-				curveSegments = 4,
-				bevelThickness = 2,
-				bevelSize = 1.5;
+			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1500);
+			camera.position.set(0, 400, 700);
 
-			let font = null;
-			const mirror = false;
-
-			let targetRotation = 0;
-			let targetRotationOnPointerDown = 0;
-
-			let pointerX = 0;
-			let pointerXOnPointerDown = 0;
-
-			let windowHalfX = window.innerWidth / 2;
-
-			init();
-			animate();
-
-			function init() {
-				var raycaster, mouse = { x : 0, y : 0 };
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
-
-				// CAMERA
-
-				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1500 );
-				camera.position.set( 0, 400, 700 );
-
-				cameraTarget = new THREE.Vector3( 0, 150, 0 );
+			cameraTarget = new THREE.Vector3(0, 150, 0);
 
 
-				
 
 
-				// SCENE
-				
 
-				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x000000 );
-				scene.fog = new THREE.Fog( 0x000000, 250, 1400 );
+			// SCENE
 
-				
 
-				// LIGHTS
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color(0x000000);
+			scene.fog = new THREE.Fog(0x000000, 250, 1400);
 
-				const dirLight = new THREE.DirectionalLight( 0xffffff, 0.125 );
-				dirLight.position.set( 0, 0, 1 ).normalize();
-				scene.add( dirLight );
 
-				const pointLight = new THREE.PointLight( 0xffffff, 1.5 );
-				pointLight.position.set( 0, 100, 90 );
-				pointLight.color.setHSL( Math.random(), 1, 0.5 );
-				scene.add( pointLight );
 
-				material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
+			// LIGHTS
 
-				group = new THREE.Group();
-				console.log(group.children);
-				
-				group.position.y = 100;
-	
-				
+			const dirLight = new THREE.DirectionalLight(0xffffff, 0.125);
+			dirLight.position.set(0, 0, 1).normalize();
+			scene.add(dirLight);
 
-				scene.add( group );
-				
-				const geometry  = new THREE.CircleGeometry( 300, 32 );
-				material = new THREE.MeshBasicMaterial({color:0x708090});
-				const clock = new THREE.Mesh(geometry,material);
-				group.add(clock);
-				
-				const loader = new THREE.TTFLoader();
-				
-				loader.load( fontttf, function ( json ) {
+			const pointLight = new THREE.PointLight(0xffffff, 1.5);
+			pointLight.position.set(0, 100, 90);
+			pointLight.color.setHSL(Math.random(), 1, 0.5);
+			scene.add(pointLight);
+
+			material = new THREE.MeshBasicMaterial({ color: 0xffffff, flatShading: true });
+
+			group = new THREE.Group();
+			group.position.y = 100;
+
+
+
+			scene.add(group);
+
+			const geometry = new THREE.CircleGeometry(300, 32);
+			material = new THREE.MeshBasicMaterial({ color: 0x708090 });
+			const clock = new THREE.Mesh(geometry, material);
+			group.add(clock);
+
+			const loader = new THREE.TTFLoader();
+
+			loader.load(fontttf, function (json) {
 				console.log(json)
-					font = new THREE.Font( json );
-					createText();
+				font = new THREE.Font(json);
+				createText();
 
-				} );
+			});
 
-				const plane = new THREE.Mesh(
-					new THREE.PlaneGeometry( 10000, 10000 ),
-					new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.5, transparent: true } )
-				);
-				plane.position.y = 100;
-				plane.rotation.x = - Math.PI / 2;
-				scene.add( plane );
+			const plane = new THREE.Mesh(
+				new THREE.PlaneGeometry(10000, 10000),
+				new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.5, transparent: true })
+			);
+			plane.position.y = 100;
+			plane.rotation.x = - Math.PI / 2;
+			scene.add(plane);
 
-				// RENDERER
+			// RENDERER
 
-				renderer = new THREE.WebGLRenderer( { antialias: true } );
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( renderer.domElement );
-				
-		
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			container.appendChild(renderer.domElement);
 
-				// EVENTS
 
-				container.style.touchAction = 'none';
-				container.addEventListener( 'pointerdown', onPointerDown );
 
-				document.addEventListener( 'keypress', onDocumentKeyPress );
-				document.addEventListener( 'keydown', onDocumentKeyDown );
+			// EVENTS
 
-				window.addEventListener( 'resize', onWindowResize );
-				
-				
+			container.style.touchAction = 'none';
+			container.addEventListener('pointerdown', onPointerDown);
 
-			}
+			document.addEventListener('keypress', onDocumentKeyPress);
+			document.addEventListener('keydown', onDocumentKeyDown);
 
-			function onWindowResize() {
+			window.addEventListener('resize', onWindowResize);
+			window.addEventListener('mousemove',onMove);
 
-				windowHalfX = window.innerWidth / 2;
 
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
 
-				renderer.setSize( window.innerWidth, window.innerHeight );
+		}
 
-			}
+		function onWindowResize() {
 
-			function onDocumentKeyDown( event ) {
+			windowHalfX = window.innerWidth / 2;
 
-				if ( firstLetter ) {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
 
-					firstLetter = false;
-					text = '';
+			renderer.setSize(window.innerWidth, window.innerHeight);
 
-				}
+		}
 
-				const keyCode = event.keyCode;
+		function onDocumentKeyDown(event) {
 
-				// backspace
+			if (firstLetter) {
 
-				if ( keyCode === 8 ) {
-
-					event.preventDefault();
-
-					text = text.substring( 0, text.length - 1 );
-					refreshText();
-
-					return false;
-
-				}
+				firstLetter = false;
+				text = '';
 
 			}
 
-			function onDocumentKeyPress( event ) {
+			const keyCode = event.keyCode;
 
-				const keyCode = event.which;
+			// backspace
 
-				// backspace
+			if (keyCode === 8) {
 
-				if ( keyCode === 8 ) {
+				event.preventDefault();
 
-					event.preventDefault();
+				text = text.substring(0, text.length - 1);
+				refreshText();
 
-				} else {
-
-					const ch = String.fromCharCode( keyCode );
-					text += ch;
-
-					refreshText();
-
-				}
+				return false;
 
 			}
 
-			function createText() {
-				var numRadsPerChar = 2*Math.PI/text.length;
-				
-				/*
-				textGeo = new THREE.TextGeometry( text, {
+		}
+
+		function onDocumentKeyPress(event) {
+
+			const keyCode = event.which;
+
+			// backspace
+
+			if (keyCode === 8) {
+
+				event.preventDefault();
+
+			} else {
+
+				const ch = String.fromCharCode(keyCode);
+				text += ch;
+
+				refreshText();
+
+			}
+
+		}
+
+		function createText() {
+			var numRadsPerChar = 2 * Math.PI / text.length;
+
+			/*
+			textGeo = new THREE.TextGeometry( text, {
+
+				font: font,
+
+				size: size,
+				height: height,
+				curveSegments: curveSegments,
+
+				bevelThickness: bevelThickness,
+				bevelSize: bevelSize,
+				bevelEnabled: true
+
+			} );
+
+			textGeo.computeBoundingBox();
+			textGeo.computeVertexNormals();
+
+			console.log("hello"+textGeo);
+			const centerOffset = - 0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
+
+			textMesh1 = new THREE.Mesh( textGeo, material );
+
+			textMesh1.position.x = centerOffset;
+			textMesh1.position.y = hover;
+			textMesh1.position.z = 0;
+
+			textMesh1.rotation.x = 0;
+			textMesh1.rotation.y = Math.PI * 2;
+			
+			group.add( textMesh1 );
+			*/
+			for (let i = 0; i < text.length; i++) {
+
+				const texts = text[i];
+				textGeo = new THREE.TextGeometry(texts, {
 
 					font: font,
 
@@ -217,56 +249,22 @@
 					bevelSize: bevelSize,
 					bevelEnabled: true
 
-				} );
-
+				});
 				textGeo.computeBoundingBox();
 				textGeo.computeVertexNormals();
+				var textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+				textMesh1 = new THREE.Mesh(textGeo, textMaterial);
 
-				console.log("hello"+textGeo);
-				const centerOffset = - 0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
-
-				textMesh1 = new THREE.Mesh( textGeo, material );
-
-				textMesh1.position.x = centerOffset;
-				textMesh1.position.y = hover;
-				textMesh1.position.z = 0;
-
-				textMesh1.rotation.x = 0;
-				textMesh1.rotation.y = Math.PI * 2;
-				
-				group.add( textMesh1 );
-				*/
-				for(let i=0;i<text.length;i++){
-					
-					const texts = text[i];
-					textGeo = new THREE.TextGeometry( texts, {
-
-					font: font,
-
-					size: size,
-					height: height,
-					curveSegments: curveSegments,
-
-					bevelThickness: bevelThickness,
-					bevelSize: bevelSize,
-					bevelEnabled: true
-
-} );
-				textGeo.computeBoundingBox();
-				textGeo.computeVertexNormals();
-				var textMaterial = new THREE.MeshBasicMaterial( { color: 0x000000 } );
-				textMesh1 = new THREE.Mesh( textGeo, textMaterial);
-				
-				textMesh1.position.x =  200 * Math.sin(i * numRadsPerChar);
+				textMesh1.position.x = 200 * Math.sin(i * numRadsPerChar);
 				textMesh1.position.y = 170 * Math.cos(i * numRadsPerChar);
-				
 
-				textMesh1.rotation.z = Math.PI/2 -(i * numRadsPerChar);
-				
-				
-				group.add( textMesh1 );
 
-				
+				textMesh1.rotation.z = Math.PI / 2 - (i * numRadsPerChar);
+
+
+				group.add(textMesh1);
+
+
 				/*
 				if ( mirror ) {
 
@@ -284,74 +282,93 @@
 
 				}
 				*/
-			}	
+			}
 			console.log(textMesh1)
-			}
-			
-			function refreshText() {
+		}
 
-				group.remove( textMesh1 );
-				if ( mirror ) group.remove( textMesh2 );
+		function refreshText() {
 
-				if ( ! text ) return;
+			group.remove(textMesh1);
+			if (mirror) group.remove(textMesh2);
 
-				createText();
+			if (!text) return;
 
-			}
+			createText();
 
-			function onPointerDown( event ) {
+		}
 
-				if ( event.isPrimary === false ) return;
+		function onPointerDown(event) {
 
-				pointerXOnPointerDown = event.clientX - windowHalfX;
-				targetRotationOnPointerDown = targetRotation;
+			if (event.isPrimary === false) return;
 
-				document.addEventListener( 'pointermove', onPointerMove );
-				document.addEventListener( 'pointerup', onPointerUp );
+			pointerXOnPointerDown = event.clientX - windowHalfX;
+			targetRotationOnPointerDown = targetRotation;
 
-			}
+			document.addEventListener('pointermove', onPointerMove);
+			document.addEventListener('pointerup', onPointerUp);
 
-
+		}
 
 
 
-			
-			function onPointerMove( event ) {
 
-				if ( event.isPrimary === false ) return;
 
-				pointerX = event.clientX - windowHalfX;
 
-				targetRotation = targetRotationOnPointerDown + ( pointerX - pointerXOnPointerDown ) * 0.02;
+		function onPointerMove(event) {
 
-			}
-			
+			if (event.isPrimary === false) return;
 
-			function onPointerUp() {
+			pointerX = event.clientX - windowHalfX;
 
-				if ( event.isPrimary === false ) return;
+			targetRotation = targetRotationOnPointerDown + (pointerX - pointerXOnPointerDown) * 0.02;
 
-				document.removeEventListener( 'pointermove', onPointerMove );
-				document.removeEventListener( 'pointerup', onPointerUp );
+		}
 
-			}
 
-			//
+		function onPointerUp() {
 
-			function animate() {
+			if (event.isPrimary === false) return;
 
-				requestAnimationFrame( animate );
+			document.removeEventListener('pointermove', onPointerMove);
+			document.removeEventListener('pointerup', onPointerUp);
 
-				group.rotation.y += ( targetRotation - group.rotation.y ) * 0.05;
+		}
 
-				camera.lookAt( cameraTarget );
+		//
 
-				renderer.render( scene, camera );
-				
 
-			}
 
-		</script>
 
-	</body>
+
+
+		function animate() {
+
+			requestAnimationFrame(animate);
+
+			group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
+
+			camera.lookAt(cameraTarget);
+
+			renderer.render(scene, camera);
+
+
+		}
+
+		function onMove(event){
+			mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+	const intersects = raycaster.intersectObjects( scene.children );
+			console.log(scene.children.length);
+	for ( let i = 0; i < intersects.length; i ++ ) {
+
+		intersects[ i ].object.material.color.set( 0xff0000 );
+
+	}
+
+		}
+
+	</script>
+
+</body>
+
 </html>
