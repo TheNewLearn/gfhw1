@@ -45,6 +45,8 @@
         let pointerXOnPointerDown = 0;
 
         let windowHalfX = window.innerWidth / 2;
+        const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
         init();
         animate();
@@ -56,7 +58,7 @@
 
             // CAMERA
 
-            camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1500);
+            camera = new THREE.PerspectiveCamera(130, window.innerWidth / window.innerHeight, 10, 2000);
             camera.position.set(0, 400, 700);
 
             cameraTarget = new THREE.Vector3(0, 150, 0);
@@ -84,9 +86,10 @@
             group.position.y = 100;
 
 
-
+            
 
             scene.add(group);
+            
 
             const loader = new THREE.TTFLoader();
 
@@ -97,13 +100,16 @@
 
             });
 
+            var clo = group.children;
+            console.log(clo);
+
             const plane = new THREE.Mesh(
                 new THREE.PlaneGeometry(10000, 10000),
                 new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
             );
-            plane.position.y = 100;
+            plane.position.y = 10;
             plane.rotation.x = - Math.PI / 2;
-            scene.add(plane);
+            //scene.add(plane);
 
             // RENDERER
 
@@ -119,9 +125,9 @@
 
             document.addEventListener('keypress', onDocumentKeyPress);
             document.addEventListener('keydown', onDocumentKeyDown);
-
+            window.addEventListener('mousemove', onmousemove);
             window.addEventListener('resize', onWindowResize);
-
+           
         }
 
         function onWindowResize() {
@@ -182,7 +188,14 @@
 
         }
 
+        
+            
+            
+
+
+
         function createText() {
+            
             const radius = 400;
             const radian_interval = (2.0 * Math.PI) / 12;
             const center_of_wheel = {
@@ -191,7 +204,7 @@
             }
             var numRadsPerChar = 2 * Math.PI / text.length;
 
-            var clockMaterial = new THREE.MeshBasicMaterial({ color: 0x0000cd });
+            var clockMaterial = new THREE.MeshPhongMaterial({ color: 0x87cefa });
             clock = new THREE.CircleGeometry(700,1000);
             clockmesh = new THREE.Mesh(clock, clockMaterial);
 
@@ -214,12 +227,13 @@
                 });
                 textGeo.center();
                 //textGeo.computeVertexNormals();
-                var textMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+                var textMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
 
                 textMesh1 = new THREE.Mesh(textGeo, textMaterial);
 
                 circle = new THREE.CircleGeometry(100, 150);
-                material = new THREE.MeshBasicMaterial({ color: 0x000000});
+                material = new THREE.MeshPhongMaterial
+                ({ color: 0x000000});
                 cmesh = new THREE.Mesh(circle, material);
                 cmesh.position.y = 550 * Math.cos(i * numRadsPerChar);
                 
@@ -227,10 +241,12 @@
 
 
                 cmesh.add(textMesh1);
+                //group.add(cmesh);
+                
                 clockmesh.add(cmesh);
-
+                
             }
-
+        
             group.add(clockmesh);
 
             /*
@@ -263,18 +279,90 @@
 
         }
 
-        function onPointerDown(event) {
 
-            if (event.isPrimary === false) return;
-
-            pointerXOnPointerDown = event.clientX - windowHalfX;
-            targetRotationOnPointerDown = targetRotation;
-
-            document.addEventListener('pointermove', onPointerMove);
-            document.addEventListener('pointerup', onPointerUp);
-
+        function onmousemove(event){
+            
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+raycaster.setFromCamera( mouse, camera );
+            const intersects = raycaster.intersectObjects( clockmesh.children,true );
+            for ( let i = 0; i < intersects.length; i ++ ) {
+                
+              
+                    intersects[i].object.material.color.set(0xffffff);
+                    
+              
+                
+            }
         }
 
+        function onPointerDown(event) {
+
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+
+raycaster.setFromCamera( mouse, camera );
+            const intersects = raycaster.intersectObjects( clockmesh.children,true );
+            
+            for ( let i = 0; i < intersects.length; i ++ ) {
+                var objectid = intersects[i].object.id;
+            var savedcolor = intersects[i].object.material.color;
+            if(objectid == 20){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw01-TheNewLearn");
+            }
+            else if(objectid==22){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw02-TheNewLearn");
+            }
+            else if(objectid==24){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw03-TheNewLearn");
+            }
+            else if(objectid==26){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw04-TheNewLearn");
+            }
+
+            else if(objectid==28){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw05-TheNewLearn");
+            }
+
+            else if(objectid==30){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw06-TheNewLearn");
+            }
+
+            else if(objectid==32){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw07-TheNewLearn");
+            }
+
+            else if(objectid==34){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw08-TheNewLearn");
+            }
+
+            else if(objectid==36){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw09-TheNewLearn");
+            }
+
+            else if(objectid==38){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw10-TheNewLearn");
+            }
+
+            else if(objectid==40){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw11-TheNewLearn");
+            }
+
+            else if(objectid==42){
+                window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw12-TheNewLearn");
+            }
+
+
+}
+
+            //document.addEventListener('pointermove', onPointerMove);
+            //document.addEventListener('pointerup', onPointerUp);
+
+
+
+        }
+/*
         function onPointerMove(event) {
 
             if (event.isPrimary === false) return;
@@ -284,6 +372,8 @@
             targetRotation = targetRotationOnPointerDown + (pointerX - pointerXOnPointerDown) * 0.02;
 
         }
+
+        */
 
         function onPointerUp() {
 
@@ -303,6 +393,7 @@
             group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
 
             camera.lookAt(cameraTarget);
+            
 
             renderer.render(scene, camera);
 
