@@ -25,7 +25,7 @@
         let container;
         let camera, cameraTarget, scene, renderer;
         let group, textMesh1, textMesh2, textGeo, material,plane;
-        let pointgroup,hourpoint,minpoint,secpoint;
+        let pointgroup,hourpoint,minpoint,secpoint,pivot1;
         let firstLetter = true;
 
         let text = '子丑寅卯辰巳午未申酉戌亥';
@@ -100,22 +100,38 @@ plane = new THREE.Mesh(planeGeometry, planeMaterial)
             group = new THREE.Group();
             //group.position.y = 100;
 
-
+            
             pointgroup = new THREE.Group();
-           hourgeometry = new THREE.BoxGeometry(20,150,0);
+           hourgeometry = new THREE.BoxGeometry(20,250,20);
            hourmaterial = new THREE.MeshBasicMaterial( {color: 0x00000} );
           hourpoint = new THREE.Mesh(hourgeometry,hourmaterial);
-
-           mingeometry = new THREE.BoxGeometry(20,350,0);
+          
+            
+          hourpoint.position.set(0,200,5);
+          
+           mingeometry = new THREE.BoxGeometry(20,350,20);
            minmaterial = new THREE.MeshBasicMaterial( {color: 0x000000} );
            minpoint = new THREE.Mesh(mingeometry,minmaterial);
-
-           secgeometry = new THREE.BoxGeometry(20,350,0);
+           minpoint.position.set(0,250,5);
+        
+           secgeometry = new THREE.BoxGeometry(20,350,20);
            secmaterial = new THREE.MeshBasicMaterial( {color: 0x000000} );
            secpoint = new THREE.Mesh(secgeometry,secmaterial);
+           secpoint.position.set(0,250,5);
+
+           hourpoint.translateY(-210);
+           hourpoint.translateX(-30);
+           minpoint.translateY(-300);
+           minpoint.translateX(50);
+           secpoint.translateY(-150);
+           secpoint.translateX(100);
+
+           
             pointgroup.add(hourpoint,minpoint,secpoint);
-            pointgroup.position.z = 10;
-            group.add(pointgroup);
+          
+            
+            
+            scene.add(pointgroup);
 
             scene.add(group);
             
@@ -129,9 +145,19 @@ plane = new THREE.Mesh(planeGeometry, planeMaterial)
                 ptext(); 
 
             });
+            let ccent = group.children.geometry.getCenter();
 
-            var clo = group.children;
-            console.log(clo);
+            console.log(ccent);
+
+            //pointgroup.children[1].position.set(300,1500,0);
+
+            
+
+           
+           // group.children[0].geometry.center();
+            //console.log(group.children);
+
+           
 
             /*
             const plane = new THREE.Mesh(
@@ -306,11 +332,14 @@ scene.add(ptmesh);
                 //group.add(cmesh);
                 
                 clockmesh.add(cmesh);
+
+                console.log(clockmesh);
                 
                 
                 
             }
-            console.log(clockmesh.position);
+            
+           
             group.add(clockmesh);
 
             /*
@@ -455,12 +484,31 @@ raycaster.setFromCamera( mouse, camera );
         function animate() {
 
             requestAnimationFrame(animate);
+            var date = new Date();
+	var hours = date.getHours();
+	var minutes = date.getMinutes();
+	var seconds = date.getSeconds();
+    var milliseconds = date.getMilliseconds();
+	var smoothSeconds = seconds + ( milliseconds / 1000 );
+    minutes = minutes + ( smoothSeconds / 60 );
 
-            group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
+            //group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
 
             camera.lookAt(cameraTarget);
             
-
+            let center = new THREE.Vector3();
+            //pointgroup.children[1].position.y = +1;
+            //var axis = new THREE.Vector3(0,-100, 90 * Math.PI / 180);
+           
+            //pointgroup.children[1].rotateOnAxis(axis,2);
+            
+            //pointgroup.children[1].translateX(10);
+            pointgroup.children[0].rotation.z = -THREE.Math.degToRad( 0.5 * ( (60 * hours) + minutes ) );
+            pointgroup.children[1].rotation.z = -THREE.Math.degToRad( 6 * minutes );
+            pointgroup.children[2].rotation.z = -THREE.Math.degToRad( 6 * smoothSeconds );
+           // pivot1.position.set(1,0,0);
+           //pointgroup.children[1].rotateOnAxis(new THREE.Vector3(0,10,1), 0.1);
+           
             renderer.render(scene, camera);
 
         }
