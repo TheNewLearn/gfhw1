@@ -24,7 +24,8 @@
 
         let container;
         let camera, cameraTarget, scene, renderer;
-        let group, textMesh1, textMesh2, textGeo, material;
+        let group, textMesh1, textMesh2, textGeo, material,plane;
+        let pointgroup,hourpoint,minpoint,secpoint;
         let firstLetter = true;
 
         let text = '子丑寅卯辰巳午未申酉戌亥';
@@ -58,7 +59,7 @@ const mouse = new THREE.Vector2();
 
             // CAMERA
 
-            camera = new THREE.PerspectiveCamera(130, window.innerWidth / window.innerHeight, 10, 2000);
+            camera = new THREE.PerspectiveCamera(130, window.innerWidth / window.innerHeight, 0.1   , 1500);
             camera.position.set(0, 400, 700);
 
             cameraTarget = new THREE.Vector3(0, 150, 0);
@@ -66,8 +67,8 @@ const mouse = new THREE.Vector2();
             // SCENE
 
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x000000);
-            scene.fog = new THREE.Fog(0x000000, 250, 1400);
+            scene.background = new THREE.Color(0x87CEEB);
+            //scene.fog = new THREE.Fog(0x000000, 250, 1400);
 
             // LIGHTS
 
@@ -81,12 +82,40 @@ const mouse = new THREE.Vector2();
             scene.add(pointLight);
 
             
+            
 
-            group = new THREE.Group();
-            group.position.y = 100;
+
+
+            const planeGeometry = new THREE.PlaneGeometry(5000, 5000)
+  const planeMaterial = new THREE.MeshLambertMaterial({ color: 0x008F00 })
+plane = new THREE.Mesh(planeGeometry, planeMaterial)
+  plane.rotation.x = -0.5 * Math.PI
+  plane.position.set(0, -1500, 0)
+  //plane.receiveShadow = true
+  scene.add(plane)
 
 
             
+
+            group = new THREE.Group();
+            //group.position.y = 100;
+
+
+            pointgroup = new THREE.Group();
+           hourgeometry = new THREE.BoxGeometry(20,150,0);
+           hourmaterial = new THREE.MeshBasicMaterial( {color: 0x00000} );
+          hourpoint = new THREE.Mesh(hourgeometry,hourmaterial);
+
+           mingeometry = new THREE.BoxGeometry(20,350,0);
+           minmaterial = new THREE.MeshBasicMaterial( {color: 0x000000} );
+           minpoint = new THREE.Mesh(mingeometry,minmaterial);
+
+           secgeometry = new THREE.BoxGeometry(20,350,0);
+           secmaterial = new THREE.MeshBasicMaterial( {color: 0x000000} );
+           secpoint = new THREE.Mesh(secgeometry,secmaterial);
+            pointgroup.add(hourpoint,minpoint,secpoint);
+            pointgroup.position.z = 10;
+            group.add(pointgroup);
 
             scene.add(group);
             
@@ -94,15 +123,17 @@ const mouse = new THREE.Vector2();
             const loader = new THREE.TTFLoader();
 
             loader.load(fontttf, function (json) {
-                console.log(json)
+                
                 font = new THREE.Font(json);
                 createText();
+                ptext(); 
 
             });
 
             var clo = group.children;
             console.log(clo);
 
+            /*
             const plane = new THREE.Mesh(
                 new THREE.PlaneGeometry(10000, 10000),
                 new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
@@ -110,7 +141,7 @@ const mouse = new THREE.Vector2();
             plane.position.y = 10;
             plane.rotation.x = - Math.PI / 2;
             //scene.add(plane);
-
+                */
             // RENDERER
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -138,6 +169,36 @@ const mouse = new THREE.Vector2();
             camera.updateProjectionMatrix();
 
             renderer.setSize(window.innerWidth, window.innerHeight);
+
+        }
+
+
+        function ptext(){
+        var  pt = new THREE.TextGeometry("高級計算機圖學",{
+
+font: font,
+
+size: 450   ,
+height: height,
+curveSegments: curveSegments,
+
+bevelThickness: bevelThickness,
+bevelSize: bevelSize,
+bevelEnabled: true
+
+});
+pt.center();
+
+var textMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+var ptmesh = new THREE.Mesh(pt,textMaterial);
+ptmesh.position.set(0, -1500,300);
+
+
+
+ptmesh.rotation.x = -0.5 * Math.PI;
+
+
+scene.add(ptmesh);
 
         }
 
@@ -196,6 +257,7 @@ const mouse = new THREE.Vector2();
 
         function createText() {
             
+
             const radius = 400;
             const radian_interval = (2.0 * Math.PI) / 12;
             const center_of_wheel = {
@@ -204,10 +266,10 @@ const mouse = new THREE.Vector2();
             }
             var numRadsPerChar = 2 * Math.PI / text.length;
 
-            var clockMaterial = new THREE.MeshPhongMaterial({ color: 0x87cefa });
+            var clockMaterial = new THREE.MeshPhongMaterial({ color: 0xE6E6FA	 });
             clock = new THREE.CircleGeometry(700,1000);
             clockmesh = new THREE.Mesh(clock, clockMaterial);
-
+           
 
             for (let i = 0; i < text.length; i++) {
 
@@ -245,8 +307,10 @@ const mouse = new THREE.Vector2();
                 
                 clockmesh.add(cmesh);
                 
+                
+                
             }
-        
+            console.log(clockmesh.position);
             group.add(clockmesh);
 
             /*
@@ -306,50 +370,52 @@ raycaster.setFromCamera( mouse, camera );
             const intersects = raycaster.intersectObjects( clockmesh.children,true );
             
             for ( let i = 0; i < intersects.length; i ++ ) {
+                
                 var objectid = intersects[i].object.id;
+                console.log(objectid);
             var savedcolor = intersects[i].object.material.color;
-            if(objectid == 20){
+            if(objectid == 24){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw01-TheNewLearn");
             }
-            else if(objectid==22){
+            else if(objectid==26){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw02-TheNewLearn");
             }
-            else if(objectid==24){
+            else if(objectid==28){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw03-TheNewLearn");
             }
-            else if(objectid==26){
+            else if(objectid==30){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw04-TheNewLearn");
             }
 
-            else if(objectid==28){
+            else if(objectid==32){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw05-TheNewLearn");
             }
 
-            else if(objectid==30){
+            else if(objectid==34){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw06-TheNewLearn");
             }
 
-            else if(objectid==32){
+            else if(objectid==36){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw07-TheNewLearn");
             }
 
-            else if(objectid==34){
+            else if(objectid==38){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw08-TheNewLearn");
             }
 
-            else if(objectid==36){
+            else if(objectid==40){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw09-TheNewLearn");
             }
 
-            else if(objectid==38){
+            else if(objectid==42){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw10-TheNewLearn");
             }
 
-            else if(objectid==40){
+            else if(objectid==44){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw11-TheNewLearn");
             }
 
-            else if(objectid==42){
+            else if(objectid==46){
                 window.open("https://github.com/NTUT-CG-Lab/cg2021f-hw12-TheNewLearn");
             }
 
