@@ -17,15 +17,17 @@
     <script src="./opentype.min.js"></script>
     <script src="./three.min.js"></script>
     <script src="./TTFLoader.js"></script>
+    <script src="../自我評分表/scoreoutputer.min.js"></script>
+
 
     <script>
 
         var fontttf = "HanyiSentyFlorCalligraphy.ttf";
-
+        var so = new ScoreOutputer("109AEM001");
         let container;
         let camera, cameraTarget, scene, renderer;
         let group, textMesh1, textMesh2, textGeo, material,plane;
-        let pointgroup,hourpoint,minpoint,secpoint,pivot1;
+        let pointgroup,hourpoint,minpoint,secpoint,clockmesh;
         let firstLetter = true;
 
         let text = '子丑寅卯辰巳午未申酉戌亥';
@@ -107,31 +109,35 @@ plane = new THREE.Mesh(planeGeometry, planeMaterial)
           hourpoint = new THREE.Mesh(hourgeometry,hourmaterial);
           
             
-          hourpoint.position.set(0,200,5);
+          hourpoint.position.set(0,0,0);
           
            mingeometry = new THREE.BoxGeometry(20,350,20);
            minmaterial = new THREE.MeshBasicMaterial( {color: 0x000000} );
            minpoint = new THREE.Mesh(mingeometry,minmaterial);
-           minpoint.position.set(0,250,5);
+           minpoint.position.set(0,0,0);
         
            secgeometry = new THREE.BoxGeometry(20,350,20);
            secmaterial = new THREE.MeshBasicMaterial( {color: 0x000000} );
            secpoint = new THREE.Mesh(secgeometry,secmaterial);
-           secpoint.position.set(0,250,5);
-
+           
+           secpoint.position.set(0,0,0);
+           
+            /*
            hourpoint.translateY(-210);
            hourpoint.translateX(-30);
            minpoint.translateY(-300);
            minpoint.translateX(50);
            secpoint.translateY(-150);
            secpoint.translateX(100);
-
+          */
+          
            
             pointgroup.add(hourpoint,minpoint,secpoint);
           
             
             
-            scene.add(pointgroup);
+            
+           
 
             scene.add(group);
             
@@ -145,9 +151,24 @@ plane = new THREE.Mesh(planeGeometry, planeMaterial)
                 ptext(); 
 
             });
-            let ccent = group.children.geometry.getCenter();
+            
+            var date = new Date();
+	var hours = date.getHours();
+	var minutes = date.getMinutes();
+	var seconds = date.getSeconds();
+    
+    console.log(seconds);
 
-            console.log(ccent);
+    
+    pointgroup.children[1].rotateZ((-minutes / 60) * (2 * Math.PI));
+				pointgroup.children[2].rotateZ(((minutes /60) + (-seconds / 3600)) * (2 * Math.PI));
+				pointgroup.children[0].rotateZ(((-hours / 12) + (minutes / 720)) * (2 * Math.PI));
+				
+				setInterval(function(){
+					pointgroup.children[1].rotateZ((2 * Math.PI) / -3600);
+					pointgroup.children[2].rotateZ((2 * Math.PI) / -60);
+					pointgroup.children[0].rotateZ((2 * Math.PI) / (-3600 * 12));
+				},1000);
 
             //pointgroup.children[1].position.set(300,1500,0);
 
@@ -332,13 +353,22 @@ scene.add(ptmesh);
                 //group.add(cmesh);
                 
                 clockmesh.add(cmesh);
+            
+                clockmesh.add(pointgroup);
 
-                console.log(clockmesh);
+                
+
+                
+               
+
+                
                 
                 
                 
             }
             
+
+          
            
             group.add(clockmesh);
 
@@ -488,26 +518,18 @@ raycaster.setFromCamera( mouse, camera );
 	var hours = date.getHours();
 	var minutes = date.getMinutes();
 	var seconds = date.getSeconds();
-    var milliseconds = date.getMilliseconds();
-	var smoothSeconds = seconds + ( milliseconds / 1000 );
-    minutes = minutes + ( smoothSeconds / 60 );
-
-            //group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
+    
+    console.log(seconds);
+            
 
             camera.lookAt(cameraTarget);
             
-            let center = new THREE.Vector3();
-            //pointgroup.children[1].position.y = +1;
-            //var axis = new THREE.Vector3(0,-100, 90 * Math.PI / 180);
-           
-            //pointgroup.children[1].rotateOnAxis(axis,2);
             
-            //pointgroup.children[1].translateX(10);
-            pointgroup.children[0].rotation.z = -THREE.Math.degToRad( 0.5 * ( (60 * hours) + minutes ) );
-            pointgroup.children[1].rotation.z = -THREE.Math.degToRad( 6 * minutes );
-            pointgroup.children[2].rotation.z = -THREE.Math.degToRad( 6 * smoothSeconds );
-           // pivot1.position.set(1,0,0);
-           //pointgroup.children[1].rotateOnAxis(new THREE.Vector3(0,10,1), 0.1);
+            let center = new THREE.Vector3();
+          
+            
+            
+            
            
             renderer.render(scene, camera);
 
